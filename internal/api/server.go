@@ -9,6 +9,7 @@ import (
 	"github.com/andrearcaina/whisp/internal/db"
 	http2 "github.com/andrearcaina/whisp/internal/handlers/http"
 	"github.com/andrearcaina/whisp/internal/handlers/ws"
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
@@ -18,6 +19,10 @@ type Server struct {
 
 func NewWebServer() *Server {
 	cfg := config.NewConfig()
+
+	if cfg.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	// init the database connection
 	database, err := db.New(cfg)
