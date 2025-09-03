@@ -1,6 +1,6 @@
 # whisp
 
-<img src="static/favicon.ico" width="150" />
+<img src="static/favicon.ico" width="160" />
 
 real time simple anonymous chat app where anyone can send messages without the need to sign up or log in
 
