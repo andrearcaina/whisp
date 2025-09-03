@@ -18,8 +18,16 @@ func NewConfig() *Config {
 		log.Println("No .env file found")
 	}
 
+	port := os.Getenv("PORT") // for Cloud Run
+	if port == "" {
+		port = os.Getenv("APP_PORT")
+	}
+	if port == "" {
+		port = "8080" // Default fallback
+	}
+
 	return &Config{
-		PORT:  fmt.Sprintf(":%s", os.Getenv("APP_PORT")),
+		PORT:  fmt.Sprintf(":%s", port),
 		DbUrl: os.Getenv("GOOSE_DBSTRING"),
 	}
 }
