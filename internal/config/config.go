@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	PORT  string
-	DbUrl string
-	Env   string
+	Port        string
+	Env         string
+	DbUrl       string
+	TenorAPIKey string
 }
 
 func NewConfig() *Config {
@@ -38,8 +39,9 @@ func NewConfig() *Config {
 	}
 
 	return &Config{
-		PORT:  fmt.Sprintf(":%s", port),
-		DbUrl: os.Getenv("GOOSE_DBSTRING"),
-		Env:   env,
+		Port:        fmt.Sprintf(":%s", port),
+		Env:         env,
+		DbUrl:       os.Getenv("GOOSE_DBSTRING"),
+		TenorAPIKey: os.Getenv("TENOR_API_KEY"),
 	}
 }

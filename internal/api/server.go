@@ -35,12 +35,12 @@ func NewWebServer() *Server {
 	go hub.Run()
 
 	// now create an http handler with the hub and db
-	r := http2.NewRouter(database, hub)
+	h := http2.NewHandler(database, hub, cfg.TenorAPIKey)
 
 	// create the http server
 	srv := &http.Server{
-		Addr:    cfg.PORT,
-		Handler: r,
+		Addr:    cfg.Port,
+		Handler: h.NewRouter(), // set the router from the handler
 	}
 
 	return &Server{

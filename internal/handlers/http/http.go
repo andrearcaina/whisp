@@ -1,9 +1,9 @@
 package http
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/andrearcaina/whisp/internal/db"
 	"github.com/andrearcaina/whisp/internal/db/generated"
 	"github.com/andrearcaina/whisp/internal/handlers/ws"
@@ -11,33 +11,49 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(db *db.Database, hub *ws.Hub) *gin.Engine {
-	r := gin.Default()
-
-	r.Static("/static", "./static")
-
-	r.GET("/", func(c *gin.Context) {
-		serveWeb(c)
-	})
-
-	r.GET("/ws", func(c *gin.Context) {
-		ws.ServeWs(hub, db, c.Writer, c.Request)
-	})
-
-	r.GET("/api/messages", func(c *gin.Context) {
-		listMessages(db, c)
-	})
-
-	return r
+type Handler struct {
+	DB       *db.Database
+	Hub      *ws.Hub
+	TenorKey string
+	router   *gin.Engine // this is set when NewRouter is called. It isn't exported because it should only be used in this pkg
 }
 
-func serveWeb(c *gin.Context) {
-	component := views.ChatPage()
-	templ.Handler(component).ServeHTTP(c.Writer, c.Request)
+func NewHandler(db *db.Database, hub *ws.Hub, tenorKey string) *Handler {
+	return &Handler{
+		DB:       db,
+		Hub:      hub,
+		TenorKey: tenorKey,
+	}
 }
 
-func listMessages(db *db.Database, c *gin.Context) {
-	messages, err := db.GetQueries().ListMessages(c.Request.Context(), generated.ListMessagesParams{
+func (h *Handler) NewRouter() *gin.Engine {
+	h.router = gin.Default()
+
+	h.router.Static("/static", "./static")
+
+	h.router.GET("/", h.serveWeb)
+	h.router.GET("/ws", h.serveWs)
+
+	h.router.GET("/api/messages", h.listMessages)
+	h.router.GET("/api/tenor/gifs/:search", h.listTenorGifs)
+	h.router.GET("/api/tenor/gifs/:search/:limit", h.listTenorGifs) // limit is optional
+
+	return h.router
+}
+
+func (h *Handler) serveWeb(c *gin.Context) {
+	if err := views.ChatPage().Render(c.Request.Context(), c.Writer); err != nil {
+		c.String(http.StatusInternalServerError, "failed to render page")
+		return
+	}
+}
+
+func (h *Handler) serveWs(c *gin.Context) {
+	ws.ServeWs(h.Hub, h.DB, c.Writer, c.Request)
+}
+
+func (h *Handler) listMessages(c *gin.Context) {
+	messages, err := h.DB.GetQueries().ListMessages(c.Request.Context(), generated.ListMessagesParams{
 		Limit:  50,
 		Offset: 0,
 	})
@@ -53,6 +69,50 @@ func listMessages(db *db.Database, c *gin.Context) {
 			Message:   msg.Message,
 			Username:  "anonymous",
 			CreatedAt: msg.CreatedAt.Time,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) listTenorGifs(c *gin.Context) {
+	search := c.Param("search")
+	limit := c.Param("limit")
+	if search == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "search parameter is required"})
+		return
+	}
+	if limit == "" {
+		limit = "10"
+	}
+
+	url := "https://tenor.googleapis.com/v2/search?q=" + search + "&key=" + h.TenorKey + "&client_key=whisp_app" + "&limit=" + limit
+
+	gifs, err := http.Get(url)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch gifs"})
+		return
+	}
+	if gifs.StatusCode != http.StatusOK {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch gifs from tenor"})
+		return
+	}
+	defer gifs.Body.Close()
+
+	var tenorResponse tenorGIFResponse
+	if err := json.NewDecoder(gifs.Body).Decode(&tenorResponse); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse gifs response"})
+		return
+	}
+
+	// trim results to only what we need
+	// (the gif url technically but also the id and desc for reference as well as putting the desc in the alt attribute of the img tag)
+	var response []tenorGIFTrimmedResponse
+	for _, result := range tenorResponse.Results {
+		response = append(response, tenorGIFTrimmedResponse{
+			ID:     result.ID,
+			Desc:   result.ContentDescription,
+			GifUrl: result.MediaFormats.GIF.URL,
 		})
 	}
 

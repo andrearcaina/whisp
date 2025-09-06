@@ -40,6 +40,8 @@ env:
   SERVICE: ${{ secrets.GCP_SERVICE }}
   REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
   KEY: ${{ secrets.GCP_SA_KEY }}
+  DB_URL: ${{ secrets.GOOSE_DBSTRING }}
+  TENOR_KEY: ${{ secrets.TENOR_API_KEY }}
 
 jobs:
   deploy:
@@ -77,4 +79,4 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --port 8080 \
-            --set-env-vars GOOSE_DBSTRING="${{ secrets.GOOSE_DBSTRING }}"
+            --set-env-vars "GOOSE_DBSTRING=${{ env.DB_URL }}, TENOR_API_KEY=${{ env.TENOR_KEY }}"
