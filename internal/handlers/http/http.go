@@ -72,6 +72,18 @@ func (h *Handler) listMessages(c *gin.Context) {
 		})
 	}
 
+	/*
+		Expected response format:
+		[
+			{
+				"id": 33,
+				"message": "🐟",
+				"username": "anonymous",
+				"created_at": "2025-09-05T22:08:32.311568Z"
+			},
+			...
+		]
+	*/
 	c.JSON(http.StatusOK, response)
 }
 
@@ -116,5 +128,21 @@ func (h *Handler) listTenorGifs(c *gin.Context) {
 		})
 	}
 
+	/*
+		Expected response format:
+		[
+			{
+				"id": "15784368690949001113",
+				"desc": "a man in a blue shirt and tie is screaming with his hands in the air",
+				"gif_url": "https://media.tenor.com/2w1XsfvQD5kAAAAC/hhgf.gif"
+			  },
+			{
+				"id": "16963945808433096689",
+				"desc": "a little girl is laughing with her fist in the air while wearing a vest and tie .",
+				"gif_url": "https://media.tenor.com/62wK1Xyhp_EAAAAC/happy.gif"
+			  },
+			...
+		]
+	*/
 	c.JSON(http.StatusOK, response)
 }

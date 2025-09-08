@@ -70,13 +70,23 @@ func (c *Client) readPump(db *db.Database) {
 			CreatedAt: resp.CreatedAt.Time,
 		}
 
-		// Marshal to JSON and broadcast to all clients
+		// Decode the outgoing message to JSON
 		msgBytes, err := json.Marshal(outgoingMsg)
 		if err != nil {
 			log.Printf("Failed to marshal message: %v", err)
 			continue
 		}
 
+		/*
+			Broadcast the message to all clients
+			Expected response format:
+			{
+				"id": 33,
+				"message": "🐟",
+				"username": "anonymous",
+				"created_at": "2025-09-05T22:08:32.311568Z"
+			  }
+		*/
 		c.hub.broadcast <- msgBytes
 	}
 }
