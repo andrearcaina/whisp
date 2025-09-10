@@ -7,6 +7,7 @@ import (
 	"github.com/andrearcaina/whisp/internal/db"
 	"github.com/andrearcaina/whisp/internal/db/generated"
 	"github.com/andrearcaina/whisp/internal/handlers/ws"
+	"github.com/andrearcaina/whisp/internal/middleware"
 	"github.com/andrearcaina/whisp/views"
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,13 @@ func NewHandler(db *db.Database, hub *ws.Hub, tenorKey string) *Handler {
 }
 
 func (h *Handler) NewRouter() *gin.Engine {
-	h.router = gin.Default()
+	h.router = gin.New()
+
+	h.router.Use(
+		gin.Recovery(),
+		middleware.BotMiddleware(),
+		middleware.LoggerMiddleware(),
+	)
 
 	h.router.Static("/static", "./static")
 
