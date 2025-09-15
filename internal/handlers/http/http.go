@@ -32,7 +32,6 @@ func (h *Handler) NewRouter() *gin.Engine {
 
 	h.router.Use(
 		gin.Recovery(),
-		middleware.BotMiddleware(),
 		middleware.LoggerMiddleware(),
 	)
 

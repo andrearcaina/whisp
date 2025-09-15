@@ -16,5 +16,6 @@ Real time simple anonymous chat app where anyone can send messages without the n
 
 ### todo (in no particular order)
 - [ ] add auth and login maybe (but still keep anonymity)
+- [ ] add diff rooms instead of just one room and the ability to create rooms
 - [ ] allow users to send images
 - [ ] allow users to send gifs (using Tenor API)
