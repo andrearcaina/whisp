@@ -20,6 +20,8 @@ type Server struct {
 func NewWebServer() *Server {
 	cfg := config.NewConfig()
 
+	log.Printf("Running in %s mode", cfg.Env)
+
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
