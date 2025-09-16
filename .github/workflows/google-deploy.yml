@@ -27,7 +27,7 @@
 #
 # 3. Change the values in the "env" block to match your values.
 
-name: 'Deploy Whisp on Cloud Run'
+name: 'Build Whisp Image and Push to Google Artifact Registry'
 
 on:
   push:
@@ -66,17 +66,19 @@ jobs:
       - name: 'Build and Push Container'
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:${{ github.sha }}"
+          LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:latest"
           echo "Building image: $IMAGE"
-          docker build --target production -t $IMAGE .
+          docker build --target production -t $IMAGE -t $LATEST .
           docker push $IMAGE
+          docker push $LATEST
 
-      - name: 'Deploy to Cloud Run'
-        run: |
-          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:${{ github.sha }}"
-          gcloud run deploy ${{ env.SERVICE }} \
-            --image $IMAGE \
-            --region ${{ env.REGION }} \
-            --platform managed \
-            --allow-unauthenticated \
-            --port 8080 \
-            --set-env-vars "GOOSE_DBSTRING=${{ env.DB_URL }}, TENOR_API_KEY=${{ env.TENOR_KEY }}"
+      # - name: 'Deploy to Cloud Run'
+      #  run: |
+      #    IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:${{ github.sha }}"
+      #    gcloud run deploy ${{ env.SERVICE }} \
+      #      --image $IMAGE \
+      #      --region ${{ env.REGION }} \
+      #      --platform managed \
+      #      --allow-unauthenticated \
+      #     --port 8080 \
+      #     --set-env-vars "GOOSE_DBSTRING=${{ env.DB_URL }}, TENOR_API_KEY=${{ env.TENOR_KEY }}"

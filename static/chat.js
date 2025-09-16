@@ -14,7 +14,7 @@ function chatApp() {
             // check if ws is production or development
             const isProduction = window.location.hostname !== "localhost";
             const wsProtocol = isProduction ? "wss" : "ws";
-            const wsHost = isProduction ? "whisp-service-381493828834.us-central1.run.app" : "localhost:8080";
+            const wsHost = isProduction ? window.location.hostname : "localhost:8080";
             this.ws = new WebSocket(`${wsProtocol}://${wsHost}/ws`);
 
 			this.ws.onopen = () => {
