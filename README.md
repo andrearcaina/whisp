@@ -11,7 +11,7 @@ Real time simple anonymous chat app where anyone can send messages without the n
     - Goose (DB Migrations) 
     - SQLc (DB interactions)
     - pgx (DB persistence)
-- Hosting & Infrastructure: Docker, Google Artifact Registry, Render (Switched from Cloud Run)
+- Hosting & Infrastructure: Docker, GitHub Container Registry (Switched from Google Artifact Registry), Render (Switched from Cloud Run)
 - CI/CD Tools: Makefile, GitHub Actions, Air (Go Live Reload)
 
 ### todo (in no particular order)

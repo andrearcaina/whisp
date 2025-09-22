@@ -27,7 +27,7 @@
 #
 # 3. Change the values in the "env" block to match your values.
 
-name: 'Build Whisp Image and Push to Google Artifact Registry'
+name: 'Build Whisp Image and Push to Container Registry'
 
 on:
   push:
@@ -42,6 +42,8 @@ env:
   KEY: ${{ secrets.GCP_SA_KEY }}
   DB_URL: ${{ secrets.GOOSE_DBSTRING }}
   TENOR_KEY: ${{ secrets.TENOR_API_KEY }}
+  GHCR_USER: andrearcaina
+  GHCR_PASS: ${{ secrets.WHISP_GHCR_PAT }}
 
 jobs:
   deploy:
@@ -51,26 +53,42 @@ jobs:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
 
-      - name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v2'
+      # - name: 'Authenticate to Google Cloud'
+      #   uses: 'google-github-actions/auth@v2'
+      #   with:
+      #    credentials_json: '${{ env.KEY }}'
+
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v2'
+
+      # - name: 'Configure Docker to use gcloud as a credential helper'
+      #   run: |
+      #    gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v3
         with:
-          credentials_json: '${{ env.KEY }}'
+          registry: ghcr.io
+          username: ${{ env.GHCR_USER }}
+          password: ${{ env.GHCR_PASS }}
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: 'Configure Docker to use gcloud as a credential helper'
+      - name: 'Build and Push Image to GitHub Container Registry (GHCR)'
         run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
-
-      - name: 'Build and Push Container'
-        run: |
-          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:${{ github.sha }}"
-          LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:latest"
+          IMAGE="ghcr.io/${{ env.GHCR_USER }}/whisp:${{ github.sha }}"
+          LATEST="ghcr.io/${{ env.GHCR_USER }}/whisp:latest"
           echo "Building image: $IMAGE"
           docker build --target production -t $IMAGE -t $LATEST .
           docker push $IMAGE
           docker push $LATEST
+
+      # - name: 'Build and Push Container to Google Artifact Registry'
+      #  run: |
+      #    IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:${{ github.sha }}"
+      #    LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/whisp:latest"
+      #    echo "Building image: $IMAGE"
+      #    docker build --target production -t $IMAGE -t $LATEST .
+      #    docker push $IMAGE
+      #    docker push $LATEST
 
       # - name: 'Deploy to Cloud Run'
       #  run: |
