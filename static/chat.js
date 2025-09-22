@@ -68,8 +68,8 @@ function chatApp() {
 		},
 
 		formatTime(timestamp) {
-			if (!timestamp) return '';
-			return new Date(timestamp).toLocaleTimeString();
+			if (!timestamp) return "";
+			return new Date(timestamp).toLocaleString();
 		}
 	}
 }
