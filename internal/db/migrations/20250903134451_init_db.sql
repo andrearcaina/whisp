@@ -2,7 +2,9 @@
 -- +goose StatementBegin
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    message TEXT NOT NULL,
+    message TEXT,
+    image_url TEXT,
+    gif_url TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 -- +goose StatementEnd

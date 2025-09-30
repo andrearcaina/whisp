@@ -7,23 +7,37 @@ package generated
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createMessage = `-- name: CreateMessage :one
-INSERT INTO messages (message)
-VALUES ($1)
-RETURNING id, message, created_at
+INSERT INTO messages (message, image_url, gif_url)
+VALUES ($1, $2, $3)
+RETURNING id, message, image_url, gif_url, created_at
 `
 
-func (q *Queries) CreateMessage(ctx context.Context, message string) (Message, error) {
-	row := q.db.QueryRow(ctx, createMessage, message)
+type CreateMessageParams struct {
+	Message  pgtype.Text `json:"message"`
+	ImageUrl pgtype.Text `json:"image_url"`
+	GifUrl   pgtype.Text `json:"gif_url"`
+}
+
+func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
+	row := q.db.QueryRow(ctx, createMessage, arg.Message, arg.ImageUrl, arg.GifUrl)
 	var i Message
-	err := row.Scan(&i.ID, &i.Message, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Message,
+		&i.ImageUrl,
+		&i.GifUrl,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
 const listMessages = `-- name: ListMessages :many
-SELECT id, message, created_at FROM messages
+SELECT id, message, image_url, gif_url, created_at FROM messages
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -42,7 +56,13 @@ func (q *Queries) ListMessages(ctx context.Context, arg ListMessagesParams) ([]M
 	items := []Message{}
 	for rows.Next() {
 		var i Message
-		if err := rows.Scan(&i.ID, &i.Message, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Message,
+			&i.ImageUrl,
+			&i.GifUrl,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

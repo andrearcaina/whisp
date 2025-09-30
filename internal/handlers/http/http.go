@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/andrearcaina/whisp/internal/db"
@@ -59,6 +60,8 @@ func (h *Handler) serveWs(c *gin.Context) {
 }
 
 func (h *Handler) listMessages(c *gin.Context) {
+	log.Println("Fetching messages from the database...")
+
 	messages, err := h.DB.GetQueries().ListMessages(c.Request.Context(), generated.ListMessagesParams{
 		Limit:  50,
 		Offset: 0,
@@ -72,7 +75,9 @@ func (h *Handler) listMessages(c *gin.Context) {
 	for _, msg := range messages {
 		response = append(response, messageResponse{
 			ID:        msg.ID,
-			Message:   msg.Message,
+			Message:   &msg.Message.String,
+			ImageUrl:  &msg.ImageUrl.String,
+			GifUrl:    &msg.GifUrl.String,
 			Username:  "anonymous",
 			CreatedAt: msg.CreatedAt.Time,
 		})
@@ -84,6 +89,8 @@ func (h *Handler) listMessages(c *gin.Context) {
 			{
 				"id": 33,
 				"message": "🐟",
+				"image_url": null,
+				"gif_url": null,
 				"username": "anonymous",
 				"created_at": "2025-09-05T22:08:32.311568Z"
 			},

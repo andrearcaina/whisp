@@ -6,7 +6,9 @@ import (
 
 type messageResponse struct {
 	ID        int32     `json:"id"`
-	Message   string    `json:"message"`
+	Message   *string   `json:"message,omitempty"`
+	ImageUrl  *string   `json:"image_url,omitempty"`
+	GifUrl    *string   `json:"gif_url,omitempty"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }

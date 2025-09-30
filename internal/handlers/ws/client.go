@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/andrearcaina/whisp/internal/db"
+	"github.com/andrearcaina/whisp/internal/db/generated"
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var upgrader = websocket.Upgrader{
@@ -55,8 +57,12 @@ func (c *Client) readPump(db *db.Database) {
 			continue
 		}
 
+		params := generated.CreateMessageParams{
+			Message: pgtype.Text{String: incomingMsg.Message, Valid: true},
+		}
+
 		// Store only the content in the database
-		resp, err := db.GetQueries().CreateMessage(context.Background(), incomingMsg.Message)
+		resp, err := db.GetQueries().CreateMessage(context.Background(), params)
 		if err != nil {
 			log.Printf("Failed to save message: %v", err)
 			continue
@@ -65,7 +71,7 @@ func (c *Client) readPump(db *db.Database) {
 		// Create outgoing message with proper structure
 		outgoingMsg := OutgoingMessage{
 			ID:        resp.ID,
-			Message:   resp.Message,
+			Message:   resp.Message.String,
 			Username:  "anonymous",
 			CreatedAt: resp.CreatedAt.Time,
 		}
@@ -83,6 +89,8 @@ func (c *Client) readPump(db *db.Database) {
 			{
 				"id": 33,
 				"message": "🐟",
+				"image_url": null,
+				"gif_url": null,
 				"username": "anonymous",
 				"created_at": "2025-09-05T22:08:32.311568Z"
 			  }

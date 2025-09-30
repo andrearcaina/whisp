@@ -10,6 +10,8 @@ import (
 
 type Message struct {
 	ID        int32              `json:"id"`
-	Message   string             `json:"message"`
+	Message   pgtype.Text        `json:"message"`
+	ImageUrl  pgtype.Text        `json:"image_url"`
+	GifUrl    pgtype.Text        `json:"gif_url"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

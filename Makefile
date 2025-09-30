@@ -29,13 +29,13 @@ generate-lazy:
 	$(MAKE) generate tool=sqlc
 
 migrate-up:
-	export $$(cat .env | xargs) && goose -dir internal/db/migrations up
+	./scripts/migrate.sh up $(db)
 
 migrate-down:
-	export $$(cat .env | xargs) && goose -dir internal/db/migrations down
+	./scripts/migrate.sh down $(db)
 
 migrate-status:
-	export $$(cat .env | xargs) && goose -dir internal/db/migrations status
+	./scripts/migrate.sh status $(db)
 
 migrate-create:
-	goose -dir internal/db/migrations create $(name) sql
+	./scripts/migrate.sh create $(db) $(name)
