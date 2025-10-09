@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/andrearcaina/whisp/internal/db"
 	"github.com/andrearcaina/whisp/internal/db/generated"
@@ -108,12 +109,13 @@ func (h *Handler) listTenorGifs(c *gin.Context) {
 		return
 	}
 	if limit == "" {
-		limit = "10"
+		limit = "20"
 	}
 
-	url := "https://tenor.googleapis.com/v2/search?q=" + search + "&key=" + h.TenorKey + "&client_key=whisp_app" + "&limit=" + limit
+	// Properly encode the search parameter to handle spaces and special characters
+	endpoint := "https://tenor.googleapis.com/v2/search?q=" + url.QueryEscape(search) + "&key=" + h.TenorKey + "&client_key=whisp_app" + "&limit=" + limit
 
-	gifs, err := http.Get(url)
+	gifs, err := http.Get(endpoint)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch gifs"})
 		return

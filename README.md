@@ -18,4 +18,4 @@ Real time simple anonymous chat app where anyone can send messages without the n
 - [ ] add auth and login maybe (but still keep anonymity)
 - [ ] add different rooms instead of just one room and the ability to create rooms
 - [ ] allow users to send images (store using Google Cloud Storage)
-- [ ] allow users to send gifs (using Tenor API)
+- [X] allow users to send gifs (using Tenor API)

@@ -29,11 +29,13 @@ type Client struct {
 
 type IncomingMessage struct {
 	Message string `json:"message"`
+	GifUrl  string `json:"gif_url,omitempty"`
 }
 
 type OutgoingMessage struct {
 	ID        int32     `json:"id"`
-	Message   string    `json:"message"`
+	Message   string    `json:"message,omitempty"`
+	GifUrl    string    `json:"gif_url,omitempty"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -58,10 +60,11 @@ func (c *Client) readPump(db *db.Database) {
 		}
 
 		params := generated.CreateMessageParams{
-			Message: pgtype.Text{String: incomingMsg.Message, Valid: true},
+			Message: pgtype.Text{String: incomingMsg.Message, Valid: incomingMsg.Message != ""},
+			GifUrl:  pgtype.Text{String: incomingMsg.GifUrl, Valid: incomingMsg.GifUrl != ""},
 		}
 
-		// Store only the content in the database
+		// Store the message and gif_url in the database
 		resp, err := db.GetQueries().CreateMessage(context.Background(), params)
 		if err != nil {
 			log.Printf("Failed to save message: %v", err)
@@ -72,6 +75,7 @@ func (c *Client) readPump(db *db.Database) {
 		outgoingMsg := OutgoingMessage{
 			ID:        resp.ID,
 			Message:   resp.Message.String,
+			GifUrl:    resp.GifUrl.String,
 			Username:  "anonymous",
 			CreatedAt: resp.CreatedAt.Time,
 		}

@@ -8,6 +8,8 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/andrearcaina/whisp/views/components"
+
 func ChatPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -41,7 +43,23 @@ func ChatPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto px-4 py-8\" x-data=\"chatApp()\"><div class=\"max-w-4xl mx-auto\"><h1 class=\"text-3xl font-bold text-gray-100 mb-8 text-center\">whisp</h1><div class=\"bg-gray-800 rounded-lg shadow-lg mb-4\"><div class=\"h-96 overflow-y-auto p-4 border-b border-gray-700\" x-ref=\"messagesContainer\"><template x-for=\"message in messages\" :key=\"message.id\"><div x-show=\"message.message && message.message.trim()\" class=\"mb-4 p-3 bg-gray-700 rounded-lg\"><div class=\"flex justify-between items-start mb-2\"><span class=\"font-semibold text-gray-400\" x-text=\"message.username\"></span> <span class=\"text-xs text-gray-500\" x-text=\"formatTime(message.created_at)\"></span></div><p class=\"text-gray-100\" x-text=\"message.message\"></p></div></template><div x-show=\"messages.length === 0\" class=\"text-center text-gray-400 py-8\">no messages... nothing to whisp</div></div><div class=\"p-4\"><form @submit.prevent=\"sendMessage()\"><div class=\"flex gap-2\"><input type=\"text\" x-model=\"newMessage\" placeholder=\"whisp something...\" class=\"flex-1 px-4 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\" :disabled=\"!connected\"> <button type=\"submit\" :disabled=\"!newMessage.trim() || !connected\" class=\"px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors\">send</button></div></form></div></div><div class=\"text-center\"><span x-show=\"connected\" class=\"text-green-400 font-semibold\">● connected</span> <span x-show=\"!connected\" class=\"text-red-400 font-semibold\">● disconnected</span></div></div></div><script src=\"/static/chat.js\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto px-4 py-8\" x-data=\"chatApp()\"><div class=\"max-w-4xl mx-auto\"><h1 class=\"text-3xl font-bold text-gray-100 mb-8 text-center\">whisp</h1><div class=\"bg-gray-800 rounded-lg shadow-lg mb-4\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.ListMessages().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"p-4 relative\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.GifModal().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div x-show=\"selectedGif\" class=\"mb-3 p-2 bg-gray-700 rounded-lg\"><div class=\"flex items-center justify-between\"><img :src=\"selectedGif?.gif_url\" class=\"w-16 h-12 object-cover rounded\"> <span class=\"text-sm text-gray-300\">GIF selected</span> <button @click=\"removeSelectedGif()\" class=\"text-red-400 hover:text-red-300\">✕</button></div></div><form @submit.prevent=\"sendMessage()\" class=\"flex gap-2\"><input type=\"text\" x-model=\"newMessage\" placeholder=\"whisp something...\" class=\"flex-1 px-4 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\" :disabled=\"!connected\"> <button type=\"button\" @click=\"openGifModal()\" :disabled=\"!connected\" class=\"px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-600\">GIF</button> <button type=\"submit\" :disabled=\"(!newMessage.trim() && !selectedGif) || !connected || showGifModal\" class=\"px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors\">send</button></form></div></div><div class=\"text-center\"><span x-show=\"connected\" class=\"text-green-400 font-semibold\">● connected</span> <span x-show=\"!connected\" class=\"text-red-400 font-semibold\">● disconnected</span></div></div></div><script src=\"/static/chat.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
