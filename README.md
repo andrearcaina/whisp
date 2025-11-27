@@ -4,7 +4,7 @@
 
 Real time simple anonymous chat app where anyone can send messages without the need to sign up or log in
 
-### tech stack
+### Tech Stack
 - Backend: Go, Gin, Gorilla WebSockets
 - Frontend: Templ, Alpine.js, TailwindCSS
 - Database: NeonDB (PostgreSQL)
@@ -14,7 +14,8 @@ Real time simple anonymous chat app where anyone can send messages without the n
 - Hosting & Infrastructure: Docker, GitHub Container Registry (Switched from Google Artifact Registry), Render (Switched from Cloud Run)
 - CI/CD Tools: Makefile, GitHub Actions, Air (Go Live Reload)
 
-### todo (in no particular order)
+### TODO 
+In no particular order
 - [ ] add auth and login maybe (but still keep anonymity)
 - [ ] add different rooms instead of just one room and the ability to create rooms
 - [ ] allow users to send images (store using Google Cloud Storage)
