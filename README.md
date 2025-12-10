@@ -19,4 +19,5 @@ In no particular order
 - [ ] add auth and login maybe (but still keep anonymity)
 - [ ] add different rooms instead of just one room and the ability to create rooms
 - [ ] allow users to send images (store using Google Cloud Storage)
-- [X] allow users to send gifs (using Tenor API)
+- [X] allow users to send gifs (moved to Klipy API due to shutdown of Tenor API)
+    - maybe move gifs to a cloud bucket storage provider so we can store the actual gifs

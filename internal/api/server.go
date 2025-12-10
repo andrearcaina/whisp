@@ -37,7 +37,7 @@ func NewWebServer() *Server {
 	go hub.Run()
 
 	// now create an http handler with the hub and db
-	h := http2.NewHandler(database, hub, cfg.TenorAPIKey)
+	h := http2.NewHandler(database, hub, cfg.KlipyAPIKey)
 
 	// create the http server
 	srv := &http.Server{
@@ -56,7 +56,7 @@ func (s *Server) Run() error {
 	return s.HTTP.ListenAndServe()
 }
 
-func (s *Server) GracefulShutdown(ctx context.Context) error {
+func (s *Server) Close(ctx context.Context) error {
 	log.Println("Shutting down whisp gracefully...")
 
 	if s.DB != nil {

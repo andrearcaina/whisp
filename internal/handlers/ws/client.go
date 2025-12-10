@@ -52,7 +52,7 @@ func (c *Client) readPump(db *db.Database) {
 			break
 		}
 
-		// Parse the incoming JSON message
+		// parse the incoming JSON message
 		var incomingMsg IncomingMessage
 		if err := json.Unmarshal(message, &incomingMsg); err != nil {
 			log.Printf("Failed to parse message: %v", err)
@@ -64,14 +64,14 @@ func (c *Client) readPump(db *db.Database) {
 			GifUrl:  pgtype.Text{String: incomingMsg.GifUrl, Valid: incomingMsg.GifUrl != ""},
 		}
 
-		// Store the message and gif_url in the database
+		// store the message and gif_url in the database
 		resp, err := db.GetQueries().CreateMessage(context.Background(), params)
 		if err != nil {
 			log.Printf("Failed to save message: %v", err)
 			continue
 		}
 
-		// Create outgoing message with proper structure
+		// create outgoing message with proper structure
 		outgoingMsg := OutgoingMessage{
 			ID:        resp.ID,
 			Message:   resp.Message.String,
@@ -80,7 +80,7 @@ func (c *Client) readPump(db *db.Database) {
 			CreatedAt: resp.CreatedAt.Time,
 		}
 
-		// Decode the outgoing message to JSON
+		// decode the outgoing message to JSON
 		msgBytes, err := json.Marshal(outgoingMsg)
 		if err != nil {
 			log.Printf("Failed to marshal message: %v", err)
@@ -89,7 +89,7 @@ func (c *Client) readPump(db *db.Database) {
 
 		/*
 			Broadcast the message to all clients
-			Expected response format:
+			expected response format:
 			{
 				"id": 33,
 				"message": "🐟",
@@ -108,22 +108,16 @@ func (c *Client) writePump() {
 		c.conn.Close()
 	}()
 
-	for {
-		select {
-		case message, ok := <-c.send:
-			if !ok {
-				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				if err != nil {
-					return
-				}
-				return
-			}
-
-			err := c.conn.WriteMessage(websocket.TextMessage, message)
-			if err != nil {
-				return
-			}
+	for message := range c.send {
+		err := c.conn.WriteMessage(websocket.TextMessage, message)
+		if err != nil {
+			return
 		}
+	}
+
+	err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	if err != nil {
+		return
 	}
 }
 

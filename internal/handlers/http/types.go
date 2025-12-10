@@ -13,11 +13,11 @@ type messageResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type tenorGIFResponse struct {
+type klipyGIFResponse struct {
 	Results []struct {
-		ID                 string `json:"id"`
-		ContentDescription string `json:"content_description"`
-		MediaFormats       struct {
+		ID           string `json:"id"`
+		Title        string `json:"title"`
+		MediaFormats struct {
 			GIF struct {
 				URL string `json:"url"`
 			} `json:"gif"`
@@ -25,8 +25,8 @@ type tenorGIFResponse struct {
 	} `json:"results"`
 }
 
-type tenorGIFTrimmedResponse struct {
+type klipyGIFTrimmedResponse struct {
 	ID     string `json:"id"`
-	Desc   string `json:"desc"`
+	Title  string `json:"title"`
 	GifUrl string `json:"gif_url"`
 }

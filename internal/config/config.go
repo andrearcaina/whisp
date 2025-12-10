@@ -13,6 +13,7 @@ type Config struct {
 	Env         string
 	DbUrl       string
 	TenorAPIKey string
+	KlipyAPIKey string
 }
 
 func NewConfig() *Config {
@@ -47,5 +48,6 @@ func NewConfig() *Config {
 		Env:         env,
 		DbUrl:       dbUrl,
 		TenorAPIKey: os.Getenv("TENOR_API_KEY"),
+		KlipyAPIKey: os.Getenv("KLIPY_API_KEY"),
 	}
 }

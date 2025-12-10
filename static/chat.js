@@ -10,14 +10,16 @@ function chatApp() {
         gifs: [],
         gifSearchQuery: "",
         gifLoading: false,
-        searchHistory: JSON.parse(localStorage.getItem('gifSearchHistory') || '[]'),
-        currentGifCategory: 'trending',
+        searchHistory: JSON.parse(
+            localStorage.getItem("gifSearchHistory") || "[]",
+        ),
+        currentGifCategory: "trending",
         searchTimeout: null,
         gifCategories: [
-            { id: 'trending', name: 'Trending', icon: '🔥' },
-            { id: 'reaction', name: 'Reactions', icon: '😀' },
-            { id: 'sports', name: 'Sports', icon: '⚽' },
-            { id: 'stickers', name: 'Stickers', icon: '✨' }
+            { id: "trending", name: "Trending", icon: "🔥" },
+            { id: "reaction", name: "Reactions", icon: "😀" },
+            { id: "sports", name: "Sports", icon: "⚽" },
+            { id: "stickers", name: "Stickers", icon: "✨" },
         ],
 
         init() {
@@ -30,15 +32,19 @@ function chatApp() {
             // check if ws is production or development
             const isProduction = window.location.hostname !== "localhost";
             const wsProtocol = isProduction ? "wss" : "ws";
-            const wsHost = isProduction ? window.location.hostname : "localhost:8080";
+            const wsHost = isProduction
+                ? window.location.hostname
+                : "localhost:8080";
             this.ws = new WebSocket(`${wsProtocol}://${wsHost}/ws`);
 
-            this.ws.onopen = () => { this.connected = true; };
+            this.ws.onopen = () => {
+                this.connected = true;
+            };
             this.ws.onclose = () => {
                 this.connected = false;
                 setTimeout(() => this.connectWebSocket(), 2000);
             };
-            this.ws.onmessage = event => {
+            this.ws.onmessage = (event) => {
                 const message = JSON.parse(event.data);
                 this.messages.push(message);
                 this.scrollToBottom();
@@ -46,11 +52,15 @@ function chatApp() {
         },
 
         sendMessage() {
-            if ((!this.newMessage.trim() && !this.selectedGif) || !this.connected) return;
+            if (
+                (!this.newMessage.trim() && !this.selectedGif) ||
+                !this.connected
+            )
+                return;
             const message = {
                 message: this.newMessage.trim(),
                 username: "anonymous",
-                gif_url: this.selectedGif?.gif_url || null
+                gif_url: this.selectedGif?.gif_url || null,
             };
             this.ws.send(JSON.stringify(message));
             this.newMessage = "";
@@ -75,7 +85,8 @@ function chatApp() {
 
         scrollToBottom() {
             this.$nextTick(() => {
-                this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+                this.$refs.messagesContainer.scrollTop =
+                    this.$refs.messagesContainer.scrollHeight;
             });
         },
 
@@ -85,7 +96,8 @@ function chatApp() {
 
         openGifModal() {
             this.showGifModal = true;
-            if (!this.gifs.length && this.currentGifCategory === 'trending') this.loadTrendingGifs();
+            if (!this.gifs.length && this.currentGifCategory === "trending")
+                this.loadTrendingGifs();
         },
 
         closeGifModal() {
@@ -100,7 +112,7 @@ function chatApp() {
         onSearchInput() {
             if (this.searchTimeout) clearTimeout(this.searchTimeout);
             if (!this.gifSearchQuery.trim()) {
-                this.currentGifCategory = 'trending';
+                this.currentGifCategory = "trending";
                 this.loadTrendingGifs();
                 return;
             }
@@ -117,16 +129,18 @@ function chatApp() {
 
         async performSearch() {
             if (!this.gifSearchQuery.trim()) return;
-            this.currentGifCategory = 'search';
+            this.currentGifCategory = "search";
             this.gifLoading = true;
             try {
-                const response = await fetch(`/api/tenor/gifs/${encodeURIComponent(this.gifSearchQuery)}`);
+                const response = await fetch(
+                    `/api/klipy/gifs/${encodeURIComponent(this.gifSearchQuery)}`,
+                );
                 if (response.ok) {
                     const data = await response.json();
-                    this.gifs = data.map(gif => ({
+                    this.gifs = data.map((gif) => ({
                         id: gif.id,
                         gif_url: gif.gif_url,
-                        desc: gif.desc || this.gifSearchQuery
+                        title: gif.title || this.gifSearchQuery,
                     }));
                     this.addToSearchHistory(this.gifSearchQuery);
                 } else {
@@ -141,13 +155,13 @@ function chatApp() {
         async loadTrendingGifs() {
             this.gifLoading = true;
             try {
-                const response = await fetch('/api/tenor/gifs/trending');
+                const response = await fetch("/api/klipy/gifs/trending");
                 if (response.ok) {
                     const data = await response.json();
-                    this.gifs = data.map(gif => ({
+                    this.gifs = data.map((gif) => ({
                         id: gif.id,
                         gif_url: gif.gif_url,
-                        desc: gif.desc || 'Trending GIF'
+                        title: gif.title || "Trending GIF",
                     }));
                 } else {
                     this.gifs = [];
@@ -163,21 +177,21 @@ function chatApp() {
             this.gifSearchQuery = "";
             this.gifLoading = true;
             try {
-                let searchTerm = '';
-                if (categoryId === 'trending') {
+                let searchTerm = "";
+                if (categoryId === "trending") {
                     await this.loadTrendingGifs();
                     return;
-                } else if (categoryId === 'reaction') searchTerm = 'reaction';
-                else if (categoryId === 'sports') searchTerm = 'sports';
-                else if (categoryId === 'stickers') searchTerm = 'sticker';
+                } else if (categoryId === "reaction") searchTerm = "reaction";
+                else if (categoryId === "sports") searchTerm = "sports";
+                else if (categoryId === "stickers") searchTerm = "stickers";
 
-                const response = await fetch(`/api/tenor/gifs/${searchTerm}`);
+                const response = await fetch(`/api/klipy/gifs/${searchTerm}`);
                 if (response.ok) {
                     const data = await response.json();
-                    this.gifs = data.map(gif => ({
+                    this.gifs = data.map((gif) => ({
                         id: gif.id,
                         gif_url: gif.gif_url,
-                        desc: gif.desc || searchTerm
+                        title: gif.title || searchTerm,
                     }));
                 } else {
                     this.gifs = [];
@@ -199,15 +213,20 @@ function chatApp() {
 
         addToSearchHistory(query) {
             if (!query.trim()) return;
-            this.searchHistory = this.searchHistory.filter(item => item !== query);
+            this.searchHistory = this.searchHistory.filter(
+                (item) => item !== query,
+            );
             this.searchHistory.unshift(query);
             this.searchHistory = this.searchHistory.slice(0, 10);
-            localStorage.setItem('gifSearchHistory', JSON.stringify(this.searchHistory));
+            localStorage.setItem(
+                "gifSearchHistory",
+                JSON.stringify(this.searchHistory),
+            );
         },
 
         useSearchHistory(query) {
             this.gifSearchQuery = query;
             this.performSearch();
-        }
+        },
     };
 }

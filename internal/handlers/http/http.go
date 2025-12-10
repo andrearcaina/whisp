@@ -17,15 +17,15 @@ import (
 type Handler struct {
 	DB       *db.Database
 	Hub      *ws.Hub
-	TenorKey string
+	KlipyKey string
 	router   *gin.Engine // this is set when NewRouter is called. It isn't exported because it should only be used in this pkg
 }
 
-func NewHandler(db *db.Database, hub *ws.Hub, tenorKey string) *Handler {
+func NewHandler(db *db.Database, hub *ws.Hub, klipyKey string) *Handler {
 	return &Handler{
 		DB:       db,
 		Hub:      hub,
-		TenorKey: tenorKey,
+		KlipyKey: klipyKey,
 	}
 }
 
@@ -43,8 +43,8 @@ func (h *Handler) NewRouter() *gin.Engine {
 	h.router.GET("/ws", h.serveWs)
 
 	h.router.GET("/api/messages", h.listMessages)
-	h.router.GET("/api/tenor/gifs/:search", h.listTenorGifs)
-	h.router.GET("/api/tenor/gifs/:search/:limit", h.listTenorGifs) // limit is optional
+	h.router.GET("/api/klipy/gifs/:search", h.listKlipyGifs)
+	h.router.GET("/api/klipy/gifs/:search/:limit", h.listKlipyGifs) // limit is optional
 
 	return h.router
 }
@@ -101,19 +101,27 @@ func (h *Handler) listMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *Handler) listTenorGifs(c *gin.Context) {
+func (h *Handler) listKlipyGifs(c *gin.Context) {
 	search := c.Param("search")
-	limit := c.Param("limit")
 	if search == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "search parameter is required"})
 		return
 	}
+
+	limit := c.Param("limit")
 	if limit == "" {
 		limit = "20"
 	}
 
-	// Properly encode the search parameter to handle spaces and special characters
-	endpoint := "https://tenor.googleapis.com/v2/search?q=" + url.QueryEscape(search) + "&key=" + h.TenorKey + "&client_key=whisp_app" + "&limit=" + limit
+	// properly encode the search parameter to handle spaces and special characters
+	endpoint := "https://api.klipy.com/v2/search?key=" + h.KlipyKey + "&q=" + url.QueryEscape(search) + "&limit=" + limit
+
+	if search == "trending" {
+		endpoint = "https://api.klipy.com/v2/featured?key=" + h.KlipyKey + "&limit=" + limit
+	}
+	if search == "stickers" {
+		endpoint += "&searchfilter=sticker"
+	}
 
 	gifs, err := http.Get(endpoint)
 	if err != nil {
@@ -121,24 +129,24 @@ func (h *Handler) listTenorGifs(c *gin.Context) {
 		return
 	}
 	if gifs.StatusCode != http.StatusOK {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch gifs from tenor"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch gifs from klipy"})
 		return
 	}
 	defer gifs.Body.Close()
 
-	var tenorResponse tenorGIFResponse
-	if err := json.NewDecoder(gifs.Body).Decode(&tenorResponse); err != nil {
+	var klipyResponse klipyGIFResponse
+	if err := json.NewDecoder(gifs.Body).Decode(&klipyResponse); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse gifs response"})
 		return
 	}
 
 	// trim results to only what we need
 	// (the gif url technically but also the id and desc for reference as well as putting the desc in the alt attribute of the img tag)
-	var response []tenorGIFTrimmedResponse
-	for _, result := range tenorResponse.Results {
-		response = append(response, tenorGIFTrimmedResponse{
+	var response []klipyGIFTrimmedResponse
+	for _, result := range klipyResponse.Results {
+		response = append(response, klipyGIFTrimmedResponse{
 			ID:     result.ID,
-			Desc:   result.ContentDescription,
+			Title:  result.Title,
 			GifUrl: result.MediaFormats.GIF.URL,
 		})
 	}
@@ -147,14 +155,14 @@ func (h *Handler) listTenorGifs(c *gin.Context) {
 		Expected response format:
 		[
 			{
-				"id": "15784368690949001113",
-				"desc": "a man in a blue shirt and tie is screaming with his hands in the air",
-				"gif_url": "https://media.tenor.com/2w1XsfvQD5kAAAAC/hhgf.gif"
+				"id": "5544765380983011",
+				"title": "Bubu the Cat Happy Dancing",
+				"gif_url": "https://static.klipy.com/ii/35ccce3d852f7995dd2da910f2abd795/b9/4d/pZ5cIOPM.gif"
 			  },
 			{
-				"id": "16963945808433096689",
-				"desc": "a little girl is laughing with her fist in the air while wearing a vest and tie .",
-				"gif_url": "https://media.tenor.com/62wK1Xyhp_EAAAAC/happy.gif"
+				"id": "2525964843568523",
+				"title": "Shaq's Excited Dance",
+				"gif_url": "https://static.klipy.com/ii/4e7bea9f7a3371424e6c16ebc93252fe/80/7c/faEUNiNuq5TjUsuXzv.gif"
 			  },
 			...
 		]
