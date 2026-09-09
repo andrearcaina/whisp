@@ -1,7 +1,16 @@
-.PHONY: build run dev clean docker-build docker-run generate generate-lazy migrate-up migrate-down migrate-status migrate-create
+.PHONY: build run dev clean docker-build docker-run generate generate-lazy fmt-check test vet migrate-up migrate-down migrate-status migrate-create
 
 build: generate-lazy
 	go build -o bin/main cmd/app/main.go
+
+fmt-check:
+	test -z "$$(gofmt -l .)"
+
+test:
+	go test ./...
+
+vet:
+	go vet ./...
 
 run:
 	./bin/main

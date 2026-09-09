@@ -4,9 +4,9 @@ ARG GO_VERSION=1.24.5
 FROM golang:${GO_VERSION}-alpine AS development
 
 RUN apk add --no-cache git curl && \
-    go install github.com/air-verse/air@latest && \
-    go install github.com/a-h/templ/cmd/templ@latest && \
-    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+    go install github.com/air-verse/air@v1.61.0 && \
+    go install github.com/a-h/templ/cmd/templ@v0.3.943 && \
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0
 
 WORKDIR /app
 
@@ -26,8 +26,8 @@ CMD ["air", "-c", ".air.toml"]
 FROM golang:${GO_VERSION}-alpine AS builder
 
 RUN apk add --no-cache git ca-certificates && \
-    go install github.com/a-h/templ/cmd/templ@latest && \
-    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+    go install github.com/a-h/templ/cmd/templ@v0.3.943 && \
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0
 
 WORKDIR /app
 
@@ -44,6 +44,8 @@ RUN templ generate && \
 FROM alpine:latest AS production
 
 RUN apk --no-cache add ca-certificates
+
+LABEL org.opencontainers.image.source="https://github.com/andrearcaina/whisp"
 
 WORKDIR /app
 
