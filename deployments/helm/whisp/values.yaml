@@ -1,0 +1,32 @@
+image:
+    repository: ghcr.io/andrearcaina/whisp
+    tag: latest
+    pullPolicy: Always
+imagePullSecrets: []
+
+# VM 2 is the production worker in this cluster.
+nodeSelector:
+    kubernetes.io/hostname: homelab-vm2
+
+whisp:
+    configSecret: whisp-config
+
+# Cloudflare terminates public TLS before traffic reaches Traefik.
+ingress:
+    enabled: true
+    className: traefik
+    annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: web
+    hosts:
+        - whisp.andrearcaina.ca
+        - whispapp.dev
+    path: /
+
+resources:
+    whisp:
+        requests:
+            cpu: 50m
+            memory: 128Mi
+        limits:
+            cpu: 500m
+            memory: 512Mi

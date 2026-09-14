@@ -1,0 +1,5 @@
+apiVersion: v2
+name: whisp
+description: Whisp chat application
+type: application
+version: 0.1.0
