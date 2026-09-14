@@ -6,7 +6,7 @@ FROM golang:${GO_VERSION}-alpine AS development
 RUN apk add --no-cache git curl && \
     go install github.com/air-verse/air@v1.61.0 && \
     go install github.com/a-h/templ/cmd/templ@v0.3.943 && \
-    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.30.0
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ FROM golang:${GO_VERSION}-alpine AS builder
 
 RUN apk add --no-cache git ca-certificates && \
     go install github.com/a-h/templ/cmd/templ@v0.3.943 && \
-    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.30.0
 
 WORKDIR /app
 
